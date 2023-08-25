@@ -1,0 +1,22 @@
+[package]
+# Package name caracters must be Unicode XID characters (numbers, `-`, `_`, or most letters). Crate name should have a snake case name.
+name = "web_server"
+version = "0.0.1"
+
+# Cargo edition. Possible supported editions: `2015`, `2018`, `2021`, etc.
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# Add support for tokio async runtime.
+tokio = { version = "1", features = ["full"] }
+
+# Add support for REST API.
+warp = { version = "0.3" }
+
+# Add support for lazy evaluation of operations.
+once_cell = { version = "1.17.0" }
+
+# Add support for async tasks which might be CPU bound.
+actix-web = { version = "4.3.0" }
