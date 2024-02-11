@@ -35,16 +35,13 @@ async fn main() {
     let thread_http_server = tokio_runtime.spawn(async move {
         http_server().await;
     });
-    let thread_tcp_chat = tokio_runtime.spawn(async move {
-        tcp_chat().await;
-    });
 
     thread_http_server.await.unwrap();
-    thread_tcp_chat.await.unwrap();
 }
 
 async fn hello(param: HashMap<String, String>) -> Result<impl warp::Reply, warp::Rejection> {
-    Ok(format!("{:#?}", param))
+  println!("Called hello");
+  Ok(format!("Params: {:#?}", param))
 }
 
 async fn http_server() {
@@ -64,77 +61,4 @@ async fn http_server() {
         .await;
 
     println!("finished http_server");
-}
-
-static CLOSED_CHAT : AtomicBool = AtomicBool::new(false);
-
-async fn tcp_chat() {
-    println!("started tcp_chat");
-
-    let listener = TcpListener::bind("localhost:8080").await.unwrap();
-
-    // tx -> transmitter
-    // rx -> receiver
-    let (tx, _rx) = broadcast::channel(10);
-
-    loop {
-        if CLOSED_CHAT.load(Ordering::SeqCst) == true {
-            println!("finished tcp_chat");
-            break;
-        }
-
-        let tx = tx.clone();
-        let mut rx = tx.subscribe();
-
-        // Open the socket.
-        let (mut socket, addr) = listener.accept().await.unwrap();
-
-        tokio::spawn(async move {
-            let (reader, mut writer) = socket.split();
-
-            // Wrap the buffer so it's possible to do more things like read entire lines.
-            let mut reader = BufReader::new(reader);
-            let mut line = String::new();
-            let closing_message = "Closing the TCP chat.\n";
-
-            loop {
-                tokio::select! {
-                    // Declare 2 concurrent branches which can share state.
-                    // The select method allows to automatically assure that the concurrent branches are not executed in parallel by different threads.
-
-                    // Send message(s).
-                    result = reader.read_line(&mut line) => {
-                        if result.unwrap() == 0 {
-                            break;
-                        }
-
-                        tx.send((line.clone(), addr)).unwrap();
-                        if line.trim() == "close" {
-                            tx.send((closing_message.to_owned(), addr)).unwrap();
-                            println!("Sent command to close chat.");
-                            break;
-                        }
-                        line.clear();
-                    }
-
-                    // Receive message(s).
-                    result = rx.recv() => {
-                        let (msg, other_addr) = result.unwrap();
-
-                        // Don't send the message to who wrote it.
-                        if addr != other_addr {
-                            writer.write_all(msg.as_bytes()).await.unwrap();
-
-                            if msg.trim() == closing_message.trim() {
-                                println!("{}", closing_message);
-                                CLOSED_CHAT.store(true, Ordering::SeqCst);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        });
-    }
-    
 }
