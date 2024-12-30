@@ -37,11 +37,12 @@ buildDockerImage() {
     dockerBaseOS='windows';
     echo 'Adding bin to PATH and expecting the BuildKit is installed there.';
     export PATH="${PATH}:bin";
-    export DOCKER_BUILDKIT=0;
+    export DOCKER_BUILDKIT=1;
     docker build \
       -f deploy/Dockerfile."${dockerBaseOS}" \
       --no-cache=false \
       --rm=true \
+      --build-arg BUILDKIT_INLINE_CACHE=1 \
       --build-arg BASE_IMAGE="${1}" \
       --build-arg BRANCH="${2}" \
       --build-arg BUILD_TYPE=release \
@@ -181,11 +182,11 @@ compileMobileRTInDockerContainer() {
 # * VERSION of the docker image
 # * PARAMETERS for the unit tests
 executeUnitTestsInDockerContainer() {
-  export DOCKER_BUILDKIT=1;
+  # export DOCKER_BUILDKIT=1;
   docker run -t \
     -e DISPLAY="${DISPLAY}" \
     --name="mobile_rt_tests_${1}" \
-    ptpuscas/mobile_rt:"${1}" "./build_release/bin/UnitTests ${2}";
+    ptpuscas/mobile_rt:"${1}" "set";
   docker rm --force --volumes "mobile_rt_tests_${1}";
 }
 

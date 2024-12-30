@@ -157,7 +157,7 @@ USER ContainerUser
 # Add environment variables in ContainerUser to also work with BuildKit
 ENV QT_VERSION="5.15.2"
 ENV \
-  PATH="C:\\Qt\\${QT_VERSION}\\mingw81_64\\bin;${PATH}" \
+  PATH="/c/MobileRT/MobileRT/binariesShell;/c/MobileRT/binariesShell;/d/a/MobileRT/MobileRT/binariesShell;C:\\MobileRT\\binariesShell;/d/a/MobileRT/MobileRT/binariesShell;C:\\Qt\\${QT_VERSION}\\mingw81_64\\bin;${PATH}" \
   Qt5_DIR="C:\\Qt\\${QT_VERSION}\\mingw81_64\\lib\\cmake\\Qt5" \
   CPLUS_INCLUDE_PATH="C:\\Qt\\${QT_VERSION}\\mingw81_64\\include;C:\\Qt\\${QT_VERSION}\\mingw81_64\\include\\QtWidgets;C:\\Qt\\${QT_VERSION}\\mingw81_64\\include\\QtGui;C:\\Qt\\${QT_VERSION}\\mingw81_64\\include\\QtCore"
 ###############################################################################
@@ -202,5 +202,8 @@ RUN \
 ###############################################################################
 ENTRYPOINT ["cmd", "/S", "/V:ON", "/E:ON", "/C", "sh", "-c"]
 CMD ["sh scripts/profile.sh !BUILD_TYPE!"]
+RUN sh -c "export PATH=${PATH}:/d/a/MobileRT/MobileRT/binariesShell:/c/MobileRT/MobileRT/binariesShell:/c/MobileRT/binariesShell;"
+RUN sh -c "env"
+ENTRYPOINT ["cmd", "/S", "/V:ON", "/E:ON", "/C", "sh", "-c"]
 ###############################################################################
 ###############################################################################

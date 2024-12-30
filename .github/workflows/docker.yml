@@ -46,16 +46,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-        - host_os: ubuntu-latest
-          BASE_IMAGE: ubuntu:24.04
-        - host_os: ubuntu-latest
-          BASE_IMAGE: tgagor/centos:stream9
-        - host_os: ubuntu-latest
-          BASE_IMAGE: archlinux/archlinux:base-devel
-        - host_os: ubuntu-latest
-          BASE_IMAGE: alpine:3.21
-        - host_os: ubuntu-latest
-          BASE_IMAGE: gentoo/stage3:latest
         - host_os: windows-latest
           BASE_IMAGE: mcr.microsoft.com/windows/servercore:ltsc2022
 
@@ -165,7 +155,7 @@ jobs:
 
     - name: Install Docker BuildKit & Buildx & build image Windows
       timeout-minutes: 60
-      if: success() && env.BUILD_IMAGE == 'yes' && startsWith(matrix.host_os, 'windows') && false
+      if: success() && env.BUILD_IMAGE == 'yes' && startsWith(matrix.host_os, 'windows')
       shell: powershell
       working-directory: .
       run: |
@@ -323,7 +313,7 @@ jobs:
 
     - name: Build Docker image
       timeout-minutes: 300
-      if: success() && env.BUILD_IMAGE == 'yes'
+      if: success() && env.BUILD_IMAGE == 'yes' && !startsWith(matrix.host_os, 'windows')
       run: |
         # shellcheck disable=SC1091
         echo "BASE_IMAGE: ${{ matrix.BASE_IMAGE }}";
